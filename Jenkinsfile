@@ -39,7 +39,8 @@ pipeline {
             steps {
                 echo "Building Docker image..."
                 script {
-                    sh "docker build -t ${env.IMAGE_NAME}:${env.TAG} -t ${env.IMAGE_NAME}:latest ."
+                    // Build the image using the Jenkins Docker wrapper
+                    app = docker.build("${env.IMAGE_NAME}")
                 }
             }
         }
@@ -48,9 +49,10 @@ pipeline {
             steps {
                 echo "Pushing Docker image to registry..."
                 script {
+                    // This block automatically logs in, tags, and pushes securely using your credentials ID
                     docker.withRegistry('https://registry.hub.docker.com', "${env.DOCKER_CREDENTIALS_ID}") {
-                        sh "docker push ${env.IMAGE_NAME}:${env.TAG}"
-                        sh "docker push ${env.IMAGE_NAME}:latest"
+                        app.push("${env.TAG}")
+                        app.push("latest")
                     }
                 }
             }
