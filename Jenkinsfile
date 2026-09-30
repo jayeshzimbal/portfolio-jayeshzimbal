@@ -2,9 +2,8 @@ pipeline {
     agent any
 
     environment {
-        // Replace with your actual Docker Hub credentials ID created in Jenkins
         DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
-        IMAGE_NAME = 'jayeshzimbal/portfolio' // Update with your Docker Hub username/repo
+        IMAGE_NAME = 'jayeshzimbal/portfolio'
         TAG = "${env.BUILD_NUMBER}"
     }
 
@@ -40,7 +39,7 @@ pipeline {
             steps {
                 echo "Building Docker image..."
                 script {
-                    app = docker.build("${env.IMAGE_NAME}:${env.TAG}")
+                    sh "docker build -t ${env.IMAGE_NAME}:${env.TAG} -t ${env.IMAGE_NAME}:latest ."
                 }
             }
         }
@@ -50,8 +49,8 @@ pipeline {
                 echo "Pushing Docker image to registry..."
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', "${env.DOCKER_CREDENTIALS_ID}") {
-                        app.push("${env.TAG}")
-                        app.push("latest")
+                        sh "docker push ${env.IMAGE_NAME}:${env.TAG}"
+                        sh "docker push ${env.IMAGE_NAME}:latest"
                     }
                 }
             }
